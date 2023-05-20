@@ -1,0 +1,18 @@
+FROM alpine:latest
+
+WORKDIR /homebridge
+
+RUN apk add nodejs npm python3 && \
+    apk add -t .temp build-base python3-dev && \
+    npm -g install homebridge homebridge-config-ui-x homebridge-mqttthing && \
+    apk del .temp && \
+    apk upgrade && \
+    rm -rf /var/cache/apk
+
+RUN addgroup -g 105 homebridge && \
+    adduser -u 105 -G homebridge -g homebridge -h /homebridge -s /sbin/nologin -S -H homebridge && \
+    chown -R homebridge:homebridge /homebridge
+
+USER homebridge
+
+CMD [ "homebridge", "-T" ]

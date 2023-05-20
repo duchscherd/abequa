@@ -1,0 +1,67 @@
+version: "3.8"
+
+x-logging: &logging
+  logging:
+    driver: syslog
+    options:
+      syslog-address: "unixgram:///dev/log"
+      tag: "{{.Name}}"
+
+x-defaults: &defaults
+  hostname: hub
+  restart: always
+  network_mode: host
+  <<: *logging
+
+services:
+
+  mosquitto:
+    build: mosquitto
+    volumes:
+      - ./mosquitto/mosquitto.conf:/etc/mosquitto/mosquitto.conf:ro
+    <<: *defaults
+
+  govee:
+    build: govee
+    volumes:
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
+    <<: *defaults
+
+  mqtt-prom:
+    build: mqtt-prom
+    <<: *defaults
+
+  homebridge:
+    build: homebridge
+    volumes:
+      - ./homebridge/storage:/homebridge/.homebridge
+      - /var/log/messages:/var/log/homebridge.log:ro
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
+    <<: *defaults
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/storage:/prometheus
+    command:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus"
+        - "--storage.tsdb.retention.time=5y"
+        - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "--web.console.templates=/usr/share/prometheus/consoles"
+        - "--web.enable-admin-api"
+    <<: *defaults
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/storage:/var/lib/grafana
+    environment:
+      DOMAIN: ${DOMAIN}
+    <<: *defaults
+
+  cloudflared:
+    image: cloudflare/cloudflared
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}

@@ -1,0 +1,5 @@
+# Ignore environmental variables that may contain secrets.
+.env
+
+# Ignore storage directories which hold state of docker containers.
+*/storage

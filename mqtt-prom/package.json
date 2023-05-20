@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mqtt": "^4.3.7",
+    "prometheus-middleware": "^1.1.3"
+  }
+}

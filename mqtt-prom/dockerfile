@@ -1,0 +1,19 @@
+FROM alpine:latest
+
+WORKDIR /mqtt-prom
+
+ADD mqtt-prom.js package.json /mqtt-prom
+
+RUN apk add nodejs npm python3 bluez && \
+    apk add -t .temp build-base python3-dev && \
+    addgroup -g 107 mqtt-prom && \
+    adduser -u 107 -G mqtt-prom -g mqtt-prom -h /mqtt-prom -s /sbin/nologin -S -H mqtt-prom && \
+    find /mqtt-prom -type f | xargs chmod -R 644 && \
+    npm install && \
+    apk del .temp && \
+    apk upgrade && \
+    rm -rf /var/cache/apk
+
+USER mqtt-prom
+
+CMD [ "node", "mqtt-prom.js" ]

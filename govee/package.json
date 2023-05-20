@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "govee-bt-client": "^1.0.15",
+    "mqtt": "^4.3.7"
+  }
+}

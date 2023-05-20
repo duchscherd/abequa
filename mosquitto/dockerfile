@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+RUN apk add mosquitto && \
+    apk upgrade && \
+    rm -rf /var/cache/apk
+
+USER mosquitto
+
+CMD [ "mosquitto", "-v", "-c", "/etc/mosquitto/mosquitto.conf" ]

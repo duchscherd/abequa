@@ -1,0 +1,27 @@
+version: "3.8"
+
+x-logging: &logging
+  logging:
+    driver: syslog
+    options:
+      syslog-address: "unixgram:///dev/log"
+      tag: "{{.Name}}"
+
+x-defaults: &defaults
+  hostname: hub
+  restart: always
+  <<: *logging
+
+services:
+
+  homebridge:
+    build: .
+    container_name: homebridge
+    image: homebridge:latest
+    network_mode: host
+    volumes:
+      - ./.homebridge:/homebridge/.homebridge
+      - /var/log/messages:/var/log/homebridge.log:ro
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
+    <<: *defaults
+

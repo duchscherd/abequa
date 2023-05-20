@@ -1,0 +1,20 @@
+FROM alpine:latest
+
+WORKDIR /govee
+
+ADD govee.js package.json /govee
+
+RUN apk add nodejs npm python3 bluez libcap-utils && \
+    apk add -t .temp build-base python3-dev bluez-dev && \
+    setcap cap_net_raw+eip /usr/bin/node && \
+    addgroup -g 106 govee && \
+    adduser -u 106 -G govee -g govee -h /govee -s /sbin/nologin -S -H govee && \
+    find /govee -type f | xargs chmod -R 644 && \
+    npm install && \
+    apk del .temp && \
+    apk upgrade && \
+    rm -rf /var/cache/apk
+
+USER govee
+
+CMD [ "node", "govee.js" ]
