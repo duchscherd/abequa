@@ -17,22 +17,26 @@ services:
 
   mosquitto:
     build: mosquitto
+    image: abequa_mosquitto:latest
     volumes:
       - ./mosquitto/mosquitto.conf:/etc/mosquitto/mosquitto.conf:ro
     <<: *defaults
 
   govee:
     build: govee
+    image: abequa_govee:latest
     volumes:
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
     <<: *defaults
 
   mqtt-prom:
     build: mqtt-prom
+    image: abequa_mqtt-prom:latest
     <<: *defaults
 
   homebridge:
     build: homebridge
+    image: abequa_homebridge
     volumes:
       - ./homebridge/storage:/homebridge/.homebridge
       - /var/log/messages:/var/log/homebridge.log:ro
