@@ -7,14 +7,7 @@ const apm = new APM()
 apm.init();
 
 mqtt_client.on('connect', function () {
-    mqtt_client.subscribe('stat/#', function (err) {
-        if (err) {
-            console.log(err.message);
-            apm.destroy();
-            mqtt_client.end();
-        }
-    })
-    mqtt_client.subscribe('tele/#', function (err) {
+    mqtt_client.subscribe('#', function (err) {
         if (err) {
             console.log(err.message);
             apm.destroy();
@@ -53,22 +46,38 @@ let gauges = {
             name: 'load_average',
             help: 'System load average',
             labelNames: ['name']
+        }),
+    illuminance:
+        new apm.client.Gauge({
+            name: 'illuminance',
+            help: 'Illuminance Lux Level',
+            labelNames: ['name']
         })
 }
 
 mqtt_client.on('message', function (topic, message) {
-    let [root, name, object] = topic.split("/");
-
     if (topic.startsWith("tele/tasmota_")) {
+        let [root, name, object] = topic.split("/");
         if (object === "STATE") {
             let state = JSON.parse(message.toString());
-            gauges['rssi'].set({ name: name }, state.Wifi.RSSI);
+            gauges['rssi'].set({ name: name }, state.Wifi.RSSI * -1);
             gauges['load_average'].set({ name: name }, state.LoadAvg);
         }
     }
 
     if (topic.startsWith("stat/Govee_H5074_") === true) {
+        let [root, name, object] = topic.split("/");
         gauges[object].set({ name: name }, Number(message.toString()));
+    }
+
+    if (topic.endsWith("/sensor/rssi/state") === true) {
+        let [name] = topic.split("/");
+        gauges['rssi'].set({ name: name }, Number(message.toString()));
+    }
+
+    if (topic === "living-room-light-sensor/sensor/illuminance/state") {
+        let [name] = topic.split("/");
+        gauges['illuminance'].set({ name: name }, Number(message.toString()));
     }
 })
 
