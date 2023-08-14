@@ -60,7 +60,7 @@ mqtt_client.on('message', function (topic, message) {
         let [root, name, object] = topic.split("/");
         if (object === "STATE") {
             let state = JSON.parse(message.toString());
-            gauges['rssi'].set({ name: name }, state.Wifi.RSSI * -1);
+            gauges['rssi'].set({ name: name }, state.Wifi.Signal);
             gauges['load_average'].set({ name: name }, state.LoadAvg);
         }
     }
