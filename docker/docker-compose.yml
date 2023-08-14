@@ -39,7 +39,7 @@ services:
     image: abequa_homebridge
     volumes:
       - ./homebridge/storage:/homebridge/.homebridge
-      - /var/log/messages:/var/log/homebridge.log:ro
+      - /var/log/homebridge.log:/var/log/homebridge.log:ro
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
     <<: *defaults
 
@@ -69,3 +69,4 @@ services:
   cloudflared:
     image: cloudflare/cloudflared
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
+    <<: *defaults
